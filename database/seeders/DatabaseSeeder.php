@@ -23,5 +23,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@pharma.com',
             'password' => Hash::make('123456789'),
         ]);
+
+        $this->call([
+            CustomerSeeder::class,
+            MedicationSeeder::class,
+            OrderSeeder::class,
+        ]);
     }
 }
