@@ -3,24 +3,23 @@
 namespace App\Http\Repositories;
 
 use App\Models\Order;
+use Illuminate\Support\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 
-class OrderRepository
-{
+class OrderRepository {
     /**
-     * Get orders filtered by medication and optional date range.
+     * Get orders by medication ID and date range with pagination.
      *
-     * This method retrieves all orders that contain a specific medication.
-     * It can also filter the results by a purchase date range if provided.
-     *
-     * @param int $medicationId The ID of the medication to filter orders by.
-     * @param string|null $startDate The start date (inclusive) for filtering orders (format: Y-m-d or datetime).
-     * @param string|null $endDate The end date (inclusive) for filtering orders (format: Y-m-d or datetime).
-     * @return array Returns an array of orders with their associated customer and order items with medications, ordered by purchase date in descending order.
+     * @param int $medicationId
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @param int $perPage
+     * @return LengthAwarePaginator
      */
-    public function getOrdersByMedicationAndDateRange(int $medicationId, ?string $startDate, ?string $endDate): array {
+    public function getOrdersByMedicationAndDateRangePaginated(int $medicationId, ?string $startDate, ?string $endDate, int $perPage = 10): LengthAwarePaginator {
         $query = Order::whereHas('orderItems', function($q) use ($medicationId) {
             $q->where('medication_id', $medicationId);
-        });
+        })->with('customer', 'orderItems.medication');
         
         if($startDate) {
             $query->where('purchase_date', '>=', $startDate);
@@ -30,14 +29,38 @@ class OrderRepository
             $query->where('purchase_date', '<=', $endDate);
         }
         
-        return $query->with('customer', 'orderItems.medication')->orderBy('purchase_date', 'desc')->get()->toArray();
+        return $query->orderBy('purchase_date', 'desc')->paginate($perPage);
     }
-
+    
     /**
-     * Find an order by its ID, including its customer and order items with medications.
+     * Get all orders by medication ID and date range (without pagination for exports).
      *
-     * @param int $id The unique identifier of the order.
-     * @return Order|null Returns the Order instance with related customer and medications if found, or null otherwise.
+     * @param int $medicationId
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return array
+     */
+    public function getAllOrdersByMedicationAndDateRange(int $medicationId, ?string $startDate, ?string $endDate): array {
+        $query = Order::whereHas('orderItems', function($q) use ($medicationId) {
+            $q->where('medication_id', $medicationId);
+        })->with('customer', 'orderItems.medication');
+        
+        if($startDate) {
+            $query->where('purchase_date', '>=', $startDate);
+        }
+        
+        if($endDate) {
+            $query->where('purchase_date', '<=', $endDate);
+        }
+        
+        return $query->orderBy('purchase_date', 'desc')->get()->toArray();
+    }
+    
+    /**
+     * Find order by ID.
+     *
+     * @param int $id
+     * @return Order|null
      */
     public function findById(int $id): ?Order {
         return Order::with('customer', 'orderItems.medication')->find($id);

@@ -13,28 +13,28 @@ class CustomerSeeder extends Seeder
      */
     public function run(): void
     {
-        $customers = [
-            [
-                'name' => 'Juan Pérez', 
-                'email' => 'juan@example.com', 
-                'phone' => '3001234567'
-            ],
-            [
-                'name' => 'María García', 
-                'email' => 'maria@example.com', 
-                'phone' => '3007654321'
-            ],
-            [
-                'name' => 'Carlos López', 
-                'email' => 'carlos@example.com', 
-                'phone' => '3012345678'
-            ],
-            [
-                'name' => 'Ana Martínez', 
-                'email' => 'ana@example.com', 
-                'phone' => '3023456789'
-            ],
-        ];
+        $customers = [];
+        
+        // Generar 50 clientes realistas
+        $firstNames = ['Juan', 'Maria', 'Carlos', 'Ana', 'Luis', 'Sofia', 'Pedro', 'Laura', 'Diego', 'Isabella'];
+        $lastNames = ['Perez', 'Garcia', 'Rodriguez', 'Martinez', 'Lopez', 'Gonzalez', 'Sanchez', 'Ramirez', 'Torres', 'Flores'];
+        $domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'example.com'];
+        
+        for($i = 1; $i <= 50; $i++) {
+            $firstName = $firstNames[array_rand($firstNames)];
+            $lastName = $lastNames[array_rand($lastNames)];
+            $name = $firstName . ' ' . $lastName;
+            $email = strtolower($firstName . '.' . $lastName . $i . '@' . $domains[array_rand($domains)]);
+            $phone = '3' . rand(0, 9) . rand(10000000, 99999999);
+            
+            $customers[] = [
+                'name' => $name,
+                'email' => $email,
+                'phone' => $phone,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
         
         foreach($customers as $customer) {
             Customer::create($customer);

@@ -36,7 +36,7 @@ class ExportController extends Controller {
      */
     public function exportExcel(ListOrdersRequest $request) {
         try {
-            $response = $this->orderService->getOrdersByLotNumber($request);
+            $response = $this->orderService->getAllOrdersByLotNumberForExport($request);
             
             if($response->getStatusCode() !== JsonResponse::HTTP_OK) {
                 return $response;
@@ -57,7 +57,6 @@ class ExportController extends Controller {
             return Excel::download($export, 'orders_lot_' . $request->lot_number . '.xlsx');
         } catch(\Exception $e) {
             Log::error('Excel export error: ' . $e->getMessage());
-            Log::error('Excel export trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'message' => 'An error occurred while exporting to Excel',
@@ -74,7 +73,7 @@ class ExportController extends Controller {
      */
     public function exportPDF(ListOrdersRequest $request) {
         try {
-            $response = $this->orderService->getOrdersByLotNumber($request);
+            $response = $this->orderService->getAllOrdersByLotNumberForExport($request);
             
             if($response->getStatusCode() !== JsonResponse::HTTP_OK) {
                 return $response;

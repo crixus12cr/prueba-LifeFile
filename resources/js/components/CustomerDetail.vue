@@ -18,7 +18,7 @@
                         <p><strong>Name:</strong> {{ customer.name }}</p>
                         <p><strong>Email:</strong> {{ customer.email }}</p>
                         <p><strong>Phone:</strong> {{ customer.phone || 'N/A' }}</p>
-                        <p><strong>Member Since:</strong> {{ customer.created_at }}</p>
+                        <p><strong>Member Since:</strong> {{ $formatDate(customer.created_at) }}</p>
                     </div>
                 </div>
                 

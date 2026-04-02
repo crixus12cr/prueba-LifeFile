@@ -82,7 +82,7 @@
                                     <td class="border p-3">{{ order.customer.name }}</td>
                                     <td class="border p-3">{{ order.customer.email }}</td>
                                     <td class="border p-3">{{ order.customer.phone || 'N/A' }}</td>
-                                    <td class="border p-3">{{ order.purchase_date }}</td>
+                                    <td class="border p-3">{{ $formatDate(order.purchase_date) }}</td>
                                     <td class="border p-3 text-center">
                                         <div class="flex justify-center gap-2">
                                             <button 
@@ -108,6 +108,31 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <!-- Pagination -->
+                        <div v-if="pagination.last_page > 1" class="flex justify-between items-center mt-6 pt-4 border-t">
+                            <div class="text-sm text-gray-600">
+                                Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
+                            </div>
+                            <div class="flex gap-2">
+                                <button 
+                                    @click="changePage(pagination.current_page - 1)"
+                                    :disabled="pagination.current_page === 1"
+                                    class="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Previous
+                                </button>
+                                <span class="px-3 py-1 bg-red-600 text-white rounded">
+                                    {{ pagination.current_page }}
+                                </span>
+                                <button 
+                                    @click="changePage(pagination.current_page + 1)"
+                                    :disabled="pagination.current_page === pagination.last_page"
+                                    class="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -147,6 +172,20 @@ export default {
                 end_date: ''
             },
             orders: [],
+            pagination: {
+                current_page: 1,
+                last_page: 1,
+                per_page: 15,
+                total: 0,
+                from: null,
+                to: null
+            },
+            links: {
+                first: null,
+                last: null,
+                prev: null,
+                next: null
+            },
             loading: false,
             searched: false,
             showModal: false,
@@ -154,7 +193,7 @@ export default {
         }
     },
     methods: {
-        async searchOrders() {
+        async searchOrders(page = 1) {
             if (!this.filters.lot_number) {
                 Swal.fire({
                     icon: 'warning',
@@ -173,9 +212,13 @@ export default {
                 params.append('lot_number', this.filters.lot_number)
                 if (this.filters.start_date) params.append('start_date', this.filters.start_date)
                 if (this.filters.end_date) params.append('end_date', this.filters.end_date)
+                params.append('page', page)
+                params.append('per_page', this.pagination.per_page)
                 
                 const response = await api.get(`/orders?${params.toString()}`)
                 this.orders = response.data.data
+                this.pagination = response.data.meta
+                this.links = response.data.links
                 
                 if (this.orders.length === 0) {
                     Swal.fire({
@@ -199,6 +242,12 @@ export default {
                 }
             } finally {
                 this.loading = false
+            }
+        },
+        
+        changePage(page) {
+            if (page >= 1 && page <= this.pagination.last_page) {
+                this.searchOrders(page)
             }
         },
         

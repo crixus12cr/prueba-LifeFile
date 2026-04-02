@@ -17,7 +17,7 @@
                     <div class="border-b pb-4">
                         <h2 class="text-xl font-semibold mb-3">Order Information</h2>
                         <p><strong>Order ID:</strong> #{{ order.id }}</p>
-                        <p><strong>Purchase Date:</strong> {{ order.purchase_date }}</p>
+                        <p><strong>Purchase Date:</strong> {{ $formatDate(order.purchase_date) }}</p>
                     </div>
                     
                     <div class="border-b pb-4">
