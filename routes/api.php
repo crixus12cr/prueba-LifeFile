@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MedicationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\AlertController;
+use Illuminate\Http\Request;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -13,6 +14,13 @@ Route::post('/login', [AuthController::class, 'login']);
 // Rutas protegidas con Sanctum
 Route::middleware('api.auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'data' => $request->user()
+        ]);
+    });
     
     // Módulo de farmacovigilancia
     Route::get('/medications/search', [MedicationController::class, 'search']);
