@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Pharmacovigilance Admin',
             'email' => 'admin@pharma.com',
-            'password' => Hash::make('123456789'),
+            'password' => Hash::make('12345678'),
         ]);
 
         $this->call([

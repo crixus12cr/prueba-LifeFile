@@ -47,7 +47,23 @@
                 
                 <!-- Orders Table -->
                 <div v-if="orders.length > 0">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Orders Found</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">Orders Found ({{ orders.length }})</h2>
+                        <div class="flex gap-2">
+                            <button 
+                                @click="exportToExcel"
+                                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                            >
+                                Export Excel
+                            </button>
+                            <button 
+                                @click="exportToPDF"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm"
+                            >
+                                Export PDF
+                            </button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
                             <thead>
@@ -112,6 +128,7 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
 import Navbar from './Navbar.vue'
 import AlertModal from './AlertModal.vue'
 import api from '../services/api'
@@ -139,7 +156,12 @@ export default {
     methods: {
         async searchOrders() {
             if (!this.filters.lot_number) {
-                alert('Lot number is required')
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Lot number is required',
+                    confirmButtonColor: '#dc2626'
+                })
                 return
             }
             
@@ -154,9 +176,24 @@ export default {
                 
                 const response = await api.get(`/orders?${params.toString()}`)
                 this.orders = response.data.data
+                
+                if (this.orders.length === 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Results',
+                        text: 'No orders found for lot number ' + this.filters.lot_number,
+                        confirmButtonColor: '#dc2626'
+                    })
+                }
             } catch (error) {
                 console.error('Search error:', error)
                 this.orders = []
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Search Failed',
+                    text: error.response?.data?.message || 'An error occurred while searching',
+                    confirmButtonColor: '#dc2626'
+                })
                 if (error.response?.status === 401) {
                     this.$router.push('/')
                 }
@@ -164,16 +201,20 @@ export default {
                 this.loading = false
             }
         },
+        
         viewOrder(id) {
             this.$router.push(`/orders/${id}`)
         },
+        
         viewCustomer(id) {
             this.$router.push(`/customers/${id}`)
         },
+        
         openAlertModal(order) {
             this.selectedOrder = order
             this.showModal = true
         },
+        
         async sendAlert(orderData) {
             try {
                 await api.post('/alerts/send', {
@@ -182,11 +223,92 @@ export default {
                     medication_name: 'Medication with lot ' + this.filters.lot_number,
                     lot_number: this.filters.lot_number
                 })
-                alert('Alert sent successfully to ' + orderData.customer.email)
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Alert Sent',
+                    text: `Alert sent successfully to ${orderData.customer.email}`,
+                    confirmButtonColor: '#dc2626'
+                })
                 this.showModal = false
             } catch (error) {
                 console.error('Alert error:', error)
-                alert('Error sending alert: ' + (error.response?.data?.message || 'Unknown error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Alert Failed',
+                    text: error.response?.data?.message || 'An error occurred while sending the alert',
+                    confirmButtonColor: '#dc2626'
+                })
+            }
+        },
+        
+        async exportToExcel() {
+            try {
+                const response = await api.get(`/orders/export/excel`, {
+                    params: {
+                        lot_number: this.filters.lot_number,
+                        start_date: this.filters.start_date,
+                        end_date: this.filters.end_date
+                    },
+                    responseType: 'blob'
+                })
+                
+                const url = window.URL.createObjectURL(new Blob([response.data]))
+                const link = document.createElement('a')
+                link.href = url
+                link.setAttribute('download', `orders_lot_${this.filters.lot_number}.xlsx`)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Complete',
+                    text: 'Excel file has been downloaded',
+                    confirmButtonColor: '#dc2626'
+                })
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Export Failed',
+                    text: error.response?.data?.message || 'An error occurred while exporting',
+                    confirmButtonColor: '#dc2626'
+                })
+            }
+        },
+        
+        async exportToPDF() {
+            try {
+                const response = await api.get(`/orders/export/pdf`, {
+                    params: {
+                        lot_number: this.filters.lot_number,
+                        start_date: this.filters.start_date,
+                        end_date: this.filters.end_date
+                    },
+                    responseType: 'blob'
+                })
+                
+                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+                const link = document.createElement('a')
+                link.href = url
+                link.setAttribute('download', `orders_lot_${this.filters.lot_number}.pdf`)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Complete',
+                    text: 'PDF file has been downloaded',
+                    confirmButtonColor: '#dc2626'
+                })
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Export Failed',
+                    text: error.response?.data?.message || 'An error occurred while exporting',
+                    confirmButtonColor: '#dc2626'
+                })
             }
         }
     }

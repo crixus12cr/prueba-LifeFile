@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MedicationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\AlertController;
+use App\Http\Controllers\Api\ExportController;
 use Illuminate\Http\Request;
 
 // Rutas públicas
@@ -28,4 +29,7 @@ Route::middleware('api.auth')->group(function () {
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::get('/customers/{id}', [CustomerController::class, 'show']);
     Route::post('/alerts/send', [AlertController::class, 'send']);
+
+    Route::get('/orders/export/excel', [ExportController::class, 'exportExcel']);
+    Route::get('/orders/export/pdf', [ExportController::class, 'exportPDF']);
 });

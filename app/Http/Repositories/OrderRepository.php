@@ -15,7 +15,7 @@ class OrderRepository
      * @param int $medicationId The ID of the medication to filter orders by.
      * @param string|null $startDate The start date (inclusive) for filtering orders (format: Y-m-d or datetime).
      * @param string|null $endDate The end date (inclusive) for filtering orders (format: Y-m-d or datetime).
-     * @return array Returns an array of orders with their associated customer, ordered by purchase date in descending order.
+     * @return array Returns an array of orders with their associated customer and order items with medications, ordered by purchase date in descending order.
      */
     public function getOrdersByMedicationAndDateRange(int $medicationId, ?string $startDate, ?string $endDate): array {
         $query = Order::whereHas('orderItems', function($q) use ($medicationId) {
@@ -30,7 +30,7 @@ class OrderRepository
             $query->where('purchase_date', '<=', $endDate);
         }
         
-        return $query->with('customer')->orderBy('purchase_date', 'desc')->get()->toArray();
+        return $query->with('customer', 'orderItems.medication')->orderBy('purchase_date', 'desc')->get()->toArray();
     }
 
     /**
