@@ -1,0 +1,154 @@
+// TABLAS PRINCIPALES DEL NEGOCIO (CORE)
+
+// Tabla: users (Usuarios del sistema)
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  email_verified_at timestamp
+  password varchar
+  remember_token varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: customers (Clientes)
+Table customers {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  phone varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: medications (Medicamentos)
+Table medications {
+  id bigint [pk, increment]
+  name varchar
+  lot_number varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: orders (Pedidos)
+Table orders {
+  id bigint [pk, increment]
+  customer_id bigint [ref: > customers.id]
+  purchase_date date
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: order_items (Items del pedido - relación N:M entre orders y medications)
+Table order_items {
+  id bigint [pk, increment]
+  order_id bigint [ref: > orders.id]
+  medication_id bigint [ref: > medications.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: alerts (Alertas de farmacovigilancia)
+Table alerts {
+  id bigint [pk, increment]
+  customer_id bigint [ref: > customers.id]
+  order_id bigint [ref: > orders.id]
+  user_id bigint [ref: > users.id]
+  sent_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// TABLAS DEL SISTEMA Y CACHE DE LARAVEL
+
+// Tabla: cache (Almacenamiento de caché)
+Table cache {
+  key varchar [pk]
+  value mediumtext
+  expiration int
+}
+
+// Tabla: cache_locks (Bloqueos para caché)
+Table cache_locks {
+  key varchar [pk]
+  owner varchar
+  expiration int
+}
+
+// Tabla: failed_jobs (Trabajos fallidos en cola)
+Table failed_jobs {
+  id bigint [pk, increment]
+  uuid varchar [unique]
+  connection text
+  queue text
+  payload longtext
+  exception longtext
+  failed_at timestamp [default: `current_timestamp()`]
+}
+
+// Tabla: jobs (Trabajos en cola)
+Table jobs {
+  id bigint [pk, increment]
+  queue varchar
+  payload longtext
+  attempts tinyint
+  reserved_at int
+  available_at int
+  created_at int
+}
+
+// Tabla: job_batches (Lotes de trabajos en cola)
+Table job_batches {
+  id varchar [pk]
+  name varchar
+  total_jobs int
+  pending_jobs int
+  failed_jobs int
+  failed_job_ids longtext
+  options mediumtext
+  cancelled_at int
+  created_at int
+  finished_at int
+}
+
+// Tabla: migrations (Control de migraciones)
+Table migrations {
+  id int [pk, increment]
+  migration varchar
+  batch int
+}
+
+// Tabla: password_reset_tokens (Tokens para resetear contraseñas)
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar
+  created_at timestamp
+}
+
+// Tabla: personal_access_tokens (Tokens de Sanctuum para API)
+Table personal_access_tokens {
+  id bigint [pk, increment]
+  tokenable_type varchar
+  tokenable_id bigint
+  name text
+  token varchar [unique]
+  abilities text
+  last_used_at timestamp
+  expires_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Tabla: sessions (Sesiones de usuarios)
+Table sessions {
+  id varchar [pk]
+  user_id bigint [ref: < users.id]
+  ip_address varchar
+  user_agent text
+  payload longtext
+  last_activity int
+}
+
+// Relación: Un token personal pertenece a un usuario (polimórfico, pero principalmente a users)
+Ref: personal_access_tokens.tokenable_id > users.id

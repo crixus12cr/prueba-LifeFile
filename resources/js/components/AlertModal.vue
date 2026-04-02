@@ -8,7 +8,6 @@
             <div 
                 class="bg-white rounded-xl shadow-2xl w-96 p-6 transform transition-all duration-300 animate-fade-in-up"
             >
-                <!-- Header con ícono de advertencia -->
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -28,7 +27,6 @@
                     </button>
                 </div>
                 
-                <!-- Contenido -->
                 <div class="mb-6">
                     <p class="text-gray-600 mb-3">
                         Are you sure you want to send an alert to:
@@ -44,7 +42,6 @@
                     </div>
                 </div>
                 
-                <!-- Botones -->
                 <div class="flex justify-end gap-3">
                     <button 
                         @click="closeModal"

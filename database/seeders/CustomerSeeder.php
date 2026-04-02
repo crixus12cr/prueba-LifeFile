@@ -15,7 +15,7 @@ class CustomerSeeder extends Seeder
     {
         $customers = [];
         
-        // Generar 50 clientes realistas
+        // Generate 50 random customers
         $firstNames = ['Juan', 'Maria', 'Carlos', 'Ana', 'Luis', 'Sofia', 'Pedro', 'Laura', 'Diego', 'Isabella'];
         $lastNames = ['Perez', 'Garcia', 'Rodriguez', 'Martinez', 'Lopez', 'Gonzalez', 'Sanchez', 'Ramirez', 'Torres', 'Flores'];
         $domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'example.com'];

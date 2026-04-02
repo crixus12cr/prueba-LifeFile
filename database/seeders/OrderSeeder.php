@@ -13,38 +13,38 @@ class OrderSeeder extends Seeder
 {
     public function run(): void
     {
-        // Obtener medicamentos con lote 951357
+        // Get medications with lot 951357
         $medications951357 = Medication::where('lot_number', '951357')->get();
         $medicationIds = $medications951357->pluck('id')->toArray();
         
-        // Obtener todos los clientes
+        // Get all customers
         $customers = Customer::all();
         
-        // Crear muchas órdenes para probar paginación (al menos 50 órdenes con lote 951357)
+        // Create many orders to test pagination (at least 50 orders with lot 951357)
         $ordersData = [];
         
-        // Generar órdenes para los últimos 60 días
+        // Generate orders for the last 60 days
         for($day = 1; $day <= 60; $day++) {
             $purchaseDate = Carbon::now()->subDays($day);
             
-            // Para cada día, crear entre 5 y 15 órdenes
+            // For each day, create between 5 and 15 orders
             $ordersPerDay = rand(5, 15);
             
             for($i = 1; $i <= $ordersPerDay; $i++) {
                 $customer = $customers->random();
                 
-                // 80% de probabilidad de que incluya un medicamento con lote 951357
+                // 80% probability to include a medication with lot 951357
                 $hasLot951357 = rand(1, 100) <= 80;
                 
                 if($hasLot951357) {
-                    // Incluir al menos un medicamento del lote 951357
+                    // Include at least one medication from lot 951357
                     $numMedications = rand(1, 4);
                     $selectedMedications = [];
                     
-                    // Agregar medicamento del lote 951357
+                    // Add medication from lot 951357
                     $selectedMedications[] = $medicationIds[array_rand($medicationIds)];
                     
-                    // Agregar medicamentos adicionales (pueden ser del mismo lote o no)
+                    // Add additional medications (may be from the same lot or not)
                     for($j = 1; $j < $numMedications; $j++) {
                         $allMedications = Medication::all()->pluck('id')->toArray();
                         $selectedMedications[] = $allMedications[array_rand($allMedications)];
@@ -56,7 +56,7 @@ class OrderSeeder extends Seeder
                         'medications' => $selectedMedications,
                     ];
                 } else {
-                    // Órdenes sin el lote 951357
+                    // Orders without lot 951357
                     $numMedications = rand(1, 3);
                     $otherMedications = Medication::where('lot_number', '!=', '951357')->pluck('id')->toArray();
                     
@@ -76,7 +76,7 @@ class OrderSeeder extends Seeder
             }
         }
         
-        // Insertar órdenes y sus items
+        // Insert orders and their items
         foreach($ordersData as $orderData) {
             $order = Order::create([
                 'customer_id' => $orderData['customer_id'],

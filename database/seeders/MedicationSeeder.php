@@ -15,7 +15,7 @@ class MedicationSeeder extends Seeder
     {
         $medications = [];
         
-        // Medicamentos con lote 951357 (el que vamos a buscar)
+        // Medicamentos con lote 951357
         for($i = 1; $i <= 10; $i++) {
             $medications[] = [
                 'name' => 'Paracetamol ' . (500 + ($i * 50)) . 'mg',
