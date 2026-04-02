@@ -16,11 +16,43 @@ use Illuminate\Support\Facades\Log;
 class SendAlertEmailJob implements ShouldQueue {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Customer instance.
+     *
+     * @var Customer
+     */
     protected $customer;
+    
+    /**
+     * Order instance.
+     *
+     * @var Order
+     */
     protected $order;
+    
+    /**
+     * Medication name.
+     *
+     * @var string
+     */
     protected $medicationName;
+    
+    /**
+     * Lot number of the medication.
+     *
+     * @var string
+     */
     protected $lotNumber;
 
+    /**
+     * Create a new job instance.
+     *
+     * @param Customer $customer
+     * @param Order $order
+     * @param string $medicationName
+     * @param string $lotNumber
+     * @return void
+     */
     public function __construct(Customer $customer, Order $order, string $medicationName, string $lotNumber) {
         $this->customer = $customer;
         $this->order = $order;
@@ -28,6 +60,11 @@ class SendAlertEmailJob implements ShouldQueue {
         $this->lotNumber = $lotNumber;
     }
 
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
     public function handle(): void {
         try {
             Mail::to($this->customer->email)->send(new AlertNotificationMail(
@@ -49,6 +86,7 @@ class SendAlertEmailJob implements ShouldQueue {
                 'error' => $e->getMessage()
             ]);
             
+            // Retry the job up to 3 times with a 5-minute delay between attempts
             if($this->attempts() < 3) {
                 $this->release(300);
             }
