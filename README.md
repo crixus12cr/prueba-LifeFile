@@ -1,6 +1,9 @@
 # Sistema de Alertas de Pharmacovigilance
 
-Sistema para identificar y notificar clientes que adquirieron medicamentos con un numero de lote especifico (951357) dentro de un rango de fechas definido.
+Sistema para identificar y notificar clientes que adquirieron medicamentos con un numero de lote especifico (filtrar por este numero tiene mas datos 951357) dentro de un rango de fechas definido.
+
+- url:
+http://127.0.0.1:8000/
 
 ## Requisitos Previos
 
