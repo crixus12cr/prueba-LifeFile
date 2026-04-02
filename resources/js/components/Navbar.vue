@@ -6,7 +6,7 @@
                     Pharmacovigilance System
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-white">Welcome, {{ user?.name }}</span>
+                    <span class="text-white">Welcome, {{ userName }}</span>
                     <button 
                         @click="logout"
                         class="bg-white text-red-600 hover:bg-gray-100 font-bold py-2 px-4 rounded-lg"
@@ -24,34 +24,27 @@ import api from '../services/api'
 
 export default {
     name: 'Navbar',
-    data() {
-        return {
-            user: null
+    computed: {
+        userName() {
+            const user = localStorage.getItem('user')
+            if (user) {
+                return JSON.parse(user).name
+            }
+            return 'User'
         }
     },
     methods: {
         async logout() {
             try {
                 await api.post('/logout')
-                localStorage.removeItem('token')
-                this.$router.push('/')
             } catch (error) {
                 console.error('Logout error:', error)
+            } finally {
                 localStorage.removeItem('token')
+                localStorage.removeItem('user')
                 this.$router.push('/')
             }
-        },
-        async getUser() {
-            try {
-                const response = await api.get('/user')
-                this.user = response.data.data
-            } catch (error) {
-                console.error('Error getting user:', error)
-            }
         }
-    },
-    mounted() {
-        this.getUser()
     }
 }
 </script>

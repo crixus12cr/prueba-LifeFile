@@ -63,7 +63,11 @@ export default {
             try {
                 const response = await api.post('/login', this.form)
                 const token = response.data.data.token
+                const user = response.data.data.user
+                
                 localStorage.setItem('token', token)
+                localStorage.setItem('user', JSON.stringify(user))
+                
                 this.$router.push('/dashboard')
             } catch (error) {
                 this.error = error.response?.data?.message || 'Invalid credentials'

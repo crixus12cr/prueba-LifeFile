@@ -144,11 +144,11 @@
         
         <!-- Alert Modal -->
         <AlertModal 
-            v-if="showModal"
-            :order="selectedOrder"
-            @close="showModal = false"
-            @confirm="sendAlert"
-        />
+        :order="selectedOrder"
+        :visible="showModal"
+        @close="showModal = false"
+        @confirm="sendAlert"
+    />
     </div>
 </template>
 
@@ -281,11 +281,10 @@ export default {
                 })
                 this.showModal = false
             } catch (error) {
-                console.error('Alert error:', error)
                 Swal.fire({
                     icon: 'error',
                     title: 'Alert Failed',
-                    text: error.response?.data?.message || 'An error occurred while sending the alert',
+                    text: error.response?.data?.message || 'An error occurred',
                     confirmButtonColor: '#dc2626'
                 })
             }
