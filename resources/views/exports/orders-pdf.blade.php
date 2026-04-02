@@ -80,7 +80,7 @@
                     <td>{{ $order['customer']['name'] ?? 'N/A' }}</td>
                     <td>{{ $order['customer']['email'] ?? 'N/A' }}</td>
                     <td>{{ $order['customer']['phone'] ?? 'N/A' }}</td>
-                    <td>{{ $order['purchase_date'] ?? 'N/A' }}</td>
+                    <td>{{ isset($order['purchase_date']) ? \Carbon\Carbon::parse($order['purchase_date'])->format('d/m/Y') : 'N/A' }}</td>
                     <td>
                         @php
                             $medicationsList = [];
