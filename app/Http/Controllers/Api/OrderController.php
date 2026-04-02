@@ -8,39 +8,53 @@ use App\Http\Services\OrderService;
 use App\Http\Requests\Order\ListOrdersRequest;
 
 class OrderController extends Controller {
+    /**
+     * OrderService instance.
+     *
+     * @var OrderService
+     */
     public OrderService $orderService;
 
+    /**
+     * Create a new OrderController instance.
+     *
+     * @param OrderService $orderService
+     */
     public function __construct(OrderService $orderService) {
         $this->orderService = $orderService;
     }
 
+    /**
+     * Get orders by lot number and date range.
+     *
+     * @param ListOrdersRequest $request
+     * @return JsonResponse
+     */
     public function index(ListOrdersRequest $request): JsonResponse {
         try {
-            $data = $this->orderService->getOrdersByLotNumber($request);
-            
-            return response()->json([
-                'data' => $data,
-            ], JsonResponse::HTTP_OK);
+            return $this->orderService->getOrdersByLotNumber($request);
         } catch(\Exception $e) {
             return response()->json([
-                'message' => 'Error al obtener órdenes',
+                'message' => 'An error occurred while trying to get orders',
                 'errors' => [$e->getMessage()],
-            ], JsonResponse::HTTP_NOT_FOUND);
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
+    /**
+     * Get order details by ID.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
     public function show(int $id): JsonResponse {
         try {
-            $data = $this->orderService->getOrderDetail($id);
-            
-            return response()->json([
-                'data' => $data,
-            ], JsonResponse::HTTP_OK);
+            return $this->orderService->getOrderDetail($id);
         } catch(\Exception $e) {
             return response()->json([
-                'message' => 'Error al obtener orden',
+                'message' => 'An error occurred while trying to get order details',
                 'errors' => [$e->getMessage()],
-            ], JsonResponse::HTTP_NOT_FOUND);
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }

@@ -8,22 +8,36 @@ use App\Http\Services\AlertService;
 use App\Http\Requests\Alert\SendAlertRequest;
 
 class AlertController extends Controller {
+    /**
+     * AlertService instance.
+     *
+     * @var AlertService
+     */
     public AlertService $alertService;
 
+    /**
+     * Create a new AlertController instance.
+     *
+     * @param AlertService $alertService
+     */
     public function __construct(AlertService $alertService) {
         $this->alertService = $alertService;
     }
 
+    /**
+     * Send an alert to a customer.
+     *
+     * @param SendAlertRequest $request
+     * @return JsonResponse
+     */
     public function send(SendAlertRequest $request): JsonResponse {
         try {
-            $data = $this->alertService->sendAlert($request->validated(), auth()->user());
+            $user = $request->user('sanctum');
             
-            return response()->json([
-                'data' => $data,
-            ], JsonResponse::HTTP_OK);
+            return $this->alertService->sendAlert($request->validated(), $user);
         } catch(\Exception $e) {
             return response()->json([
-                'message' => 'Error al enviar alerta',
+                'message' => 'An error occurred while trying to send alert',
                 'errors' => [$e->getMessage()],
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }

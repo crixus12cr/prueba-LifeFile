@@ -2,42 +2,92 @@
 
 namespace App\Http\Services;
 
+use Illuminate\Http\JsonResponse;
 use App\Http\Repositories\OrderRepository;
+use App\Http\Repositories\MedicationRepository;
 use App\Http\Requests\Order\ListOrdersRequest;
 
-class OrderService
-{
+class OrderService {
+    /**
+     * OrderRepository instance.
+     *
+     * @var OrderRepository
+     */
     public OrderRepository $orderRepository;
-    protected MedicationService $medicationService;
+    
+    /**
+     * MedicationRepository instance.
+     *
+     * @var MedicationRepository
+     */
+    protected MedicationRepository $medicationRepository;
 
-    public function __construct(OrderRepository $orderRepository, MedicationService $medicationService) {
+    /**
+     * Create a new OrderService instance.
+     *
+     * @param OrderRepository $orderRepository
+     * @param MedicationRepository $medicationRepository
+     */
+    public function __construct(OrderRepository $orderRepository, MedicationRepository $medicationRepository) {
         $this->orderRepository = $orderRepository;
-        $this->medicationService = $medicationService;
+        $this->medicationRepository = $medicationRepository;
     }
     
-    public function getOrdersByLotNumber(ListOrdersRequest $request): array {
-        $medication = $this->medicationService->searchByLotNumber($request);
+    /**
+     * Get orders by lot number and date range.
+     *
+     * @param ListOrdersRequest $request
+     * @return JsonResponse
+     */
+    public function getOrdersByLotNumber(ListOrdersRequest $request): JsonResponse {
+        
+        $medication = $this->medicationRepository->findByLotNumber($request->lot_number);
+        
+        if(!$medication) {
+            return response()->json([
+                'message' => 'Medication not found',
+                'errors' => ['No medication found with lot number: ' . $request->lot_number],
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
         
         $orders = $this->orderRepository->getOrdersByMedicationAndDateRange(
-            $medication['id'],
+            $medication->id,
             $request->start_date,
             $request->end_date
         );
         
         if(empty($orders)) {
-            throw new \Exception('No orders found for lot ' . $request->lot_number . ' in the specified date range');
+            return response()->json([
+                'message' => 'Orders not found',
+                'errors' => ['No orders found for lot ' . $request->lot_number . ' in the specified date range'],
+            ], JsonResponse::HTTP_NOT_FOUND);
         }
         
-        return $orders;
+        return response()->json([
+            'data' => $orders,
+            'message' => 'Orders retrieved successfully',
+        ], JsonResponse::HTTP_OK);
     }
     
-    public function getOrderDetail(int $orderId): array {
+    /**
+     * Get order details by ID.
+     *
+     * @param int $orderId
+     * @return JsonResponse
+     */
+    public function getOrderDetail(int $orderId): JsonResponse {
         $order = $this->orderRepository->findById($orderId);
         
         if(!$order) {
-            throw new \Exception('Order not found');
+            return response()->json([
+                'message' => 'Order not found',
+                'errors' => ['No order found with ID: ' . $orderId],
+            ], JsonResponse::HTTP_NOT_FOUND);
         }
         
-        return $order->toArray();
+        return response()->json([
+            'data' => $order->toArray(),
+            'message' => 'Order retrieved successfully',
+        ], JsonResponse::HTTP_OK);
     }
 }

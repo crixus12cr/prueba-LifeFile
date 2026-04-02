@@ -4,14 +4,18 @@ namespace App\Http\Requests\Alert;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class SendAlertRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
+        if (!auth('sanctum')->check()) {
+            return false;
+        }
         return true;
     }
 

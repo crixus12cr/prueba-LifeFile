@@ -4,6 +4,8 @@ namespace App\Http\Requests\Medication;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class SearchMedicationRequest extends FormRequest
 {
@@ -11,7 +13,20 @@ class SearchMedicationRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool {
+        if (!auth('sanctum')->check()) {
+            return false;
+        }
         return true;
+    }
+
+    /**
+     * Handle a failed authorization attempt.
+     */
+    protected function failedAuthorization() {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Unauthenticated',
+            'errors' => ['Authentication required'],
+        ], JsonResponse::HTTP_UNAUTHORIZED));
     }
 
     /**
